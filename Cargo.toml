@@ -1,0 +1,11 @@
+[package]
+name = "cow-decettle-memory-bench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy = { version = "0.2.1", features = ["full"] }
+eyre = "0.6.12"
+hex = "0.4.3"
+rand = "0.8.5"
+tokio = { version = "1.39.2", features = ["full"] }
