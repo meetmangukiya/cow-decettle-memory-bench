@@ -159,6 +159,28 @@ impl MemoryExpansionCosts {
     }
 }
 
+/// Assumed implementation of inplace editing of calldata to get an abi-encoded value of the
+/// subset of interactions: essentially equivalent of
+/// `keccak256(abi.encode(tokens, clearingPrices, trades, interactions), solver, deadline)`
+/// where interactions will be an array but of different length to reflect the subset of interactions.
+///
+/// So the idea is we could copy all of the calldata upto the last word of the `trades` encoded
+/// data. After that there will be pre/intra/post interaction offsets, since these will be
+/// partially copied interactions, we will have to update the offset of intra and post
+/// interactions. After having done that we can copy complete slices of interactions encoded data
+/// since the offsets in the interaction data is relative and by design ABI encoding is made such
+/// that they are _movable_. So, we copy over the interactions and after having copied all
+/// determine and update the lengths and interaction offset bytes. We then hash this partial
+/// message.
+/// After we got the hash, we copy over the interactions' slice of data from calldata over fully to
+/// make it the same as previous and use this same memory range for the external call that we make
+/// to the settlement contract.
+/// We have solver and deadline as additional parameters to the signed settle function, BUT we
+/// won't include those in the ABI, because if we do that, it will mess up the offsets and require
+/// us to handle offsets more hands on. We will instead append it to the calldata and manually
+/// decode those directly into variables. i.e.
+/// `signedSettle(address[],uint256[],Trade[],Interaction[][3])` instead of
+/// `signedSettle(address[],uint256[],Trade[],Interaction[][3],address,uint256)`.
 fn compute_gas_partially_signed(args: &GPv2Settlement::settleCall, offsets: [usize; 3]) -> usize {
     let plain_copy = 4 + // offsets
         1 + // tokens length
