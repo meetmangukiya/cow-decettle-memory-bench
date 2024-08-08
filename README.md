@@ -123,7 +123,9 @@ requiring any changes. After that there will be the interactions offset, we cann
 because the offset will be different since its only a subset of interactions.
 
 Not exact assembly but pseudo assembly would look like this for inplace modifications for getting
-ABI encoded data for the subset of interactions.
+ABI encoded[^1] data for the subset of interactions.
+
+[^1]: [Contract ABI Specification](https://docs.soliditylang.org/en/latest/abi-spec.html)
 
 ```solidity
 uint lastByteOfTrades;
